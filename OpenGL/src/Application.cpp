@@ -41,6 +41,11 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), &positions, GL_STATIC_DRAW);
 
+	const int POSITION_ATTRIB = 0;
+	glVertexAttribPointer(POSITION_ATTRIB, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	glEnableVertexAttribArray(POSITION_ATTRIB);
+
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
