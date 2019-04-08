@@ -122,7 +122,7 @@ int main(void)
 		"\n"
 		"void main()\n"
 		"{\n"
-		"  color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"  color = vec4(1.0, 0.0, 0.0, 1.0)\n"
 		"}\n";
 
 	unsigned int shader = CreateShader(vertexShader, fragmentShader);
@@ -142,8 +142,6 @@ int main(void)
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
-
-	glDeleteProgram(shader);
 
 	glfwTerminate();
 	return 0;
