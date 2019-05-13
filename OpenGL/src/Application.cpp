@@ -198,6 +198,13 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
+	/* Configure specific glfw/opengl params */
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // <<-- Default
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
@@ -239,14 +246,18 @@ int main(void)
 		2, 3, 0
 	};
 
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), &positions, GL_STATIC_DRAW);
 
-	const unsigned int POSITION_ATTRIB = 0;
-	glVertexAttribPointer(POSITION_ATTRIB, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-	glEnableVertexAttribArray(POSITION_ATTRIB);
+	const unsigned int POSITION_ATTRIB_IDX = 0;
+	glVertexAttribPointer(POSITION_ATTRIB_IDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	glEnableVertexAttribArray(POSITION_ATTRIB_IDX);
 
 	unsigned int ibo;
 	glGenBuffers(1, &ibo);
@@ -260,6 +271,12 @@ int main(void)
 	int location = glGetUniformLocation(shader, "u_Color");
 	ASSERT(location != -1);
 
+	// Unbind everything (so we can play around with rebinding before drawing and vaos)
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	float r = 0.00f;
 	float increment = 0.05f;
 
@@ -269,7 +286,14 @@ int main(void)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		/* Start rebinding stuff we explicity unbound */
+		glUseProgram(shader);
 		glUniform4f(location, r, 0.3, 0.8, 1.0);
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		/* End of rebinding */
+
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 		if (r > 1.0f)
