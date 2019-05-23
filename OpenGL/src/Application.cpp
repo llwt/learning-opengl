@@ -8,6 +8,7 @@
 
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
 
 static std::string ReadShaderFile(const std::string& shaderFile)
 {
@@ -140,23 +141,20 @@ int main(void)
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // so the debugbreak has the call stack
 	glEnable(GL_DEBUG_OUTPUT);
 	
-
-
-	unsigned int vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	float positions[] = {
-		-0.5f, -0.5f,
-		 0.5f, -0.5f,
-		 0.5f,  0.5f,
-		-0.5f,  0.5f,
+		-0.5f, -0.5f, // 1
+		 0.5f, -0.5f, // 2
+		 0.5f,  0.5f, // 3
+		-0.5f,  0.5f, // 4
 	};
-	VertexBuffer vb(positions, sizeof(positions));
 
-	const unsigned int POSITION_ATTRIB_IDX = 0;
-	glVertexAttribPointer(POSITION_ATTRIB_IDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-	glEnableVertexAttribArray(POSITION_ATTRIB_IDX);
+	VertexArray va;
+	VertexBuffer vb(positions, sizeof(positions));
+	VertexBufferLayout layout;
+	layout.Push<float>(2);
+	va.AddBuffer(vb, layout);
+
+	glEnableVertexAttribArray(0);
 
 	unsigned int indices[] = {
 		0, 1, 2,
@@ -172,7 +170,7 @@ int main(void)
 	ASSERT(location != -1);
 
 	// Unbind everything (so we can play around with rebinding before drawing and vaos)
-	glBindVertexArray(0);
+	va.Unbind();
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -190,7 +188,7 @@ int main(void)
 		glUseProgram(shader);
 		glUniform4f(location, r, 0.3, 0.8, 1.0);
 
-		glBindVertexArray(vao);
+		va.Bind();
 		ib.Bind();
 		/* End of rebinding */
 
