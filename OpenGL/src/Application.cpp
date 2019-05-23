@@ -4,28 +4,10 @@
 #include <fstream>
 #include <streambuf>
 
-#define ASSERT(x) if (!(x)) __debugbreak();
+#include "Debug.h"
 
-static void GLClearError() 
-{
-	while (glGetError() != GL_NO_ERROR);	
-}
-
-static bool GLLogCall(const char* function, const char* file, int line)
-{
-	while (GLenum error = glGetError())
-	{
-		std::cout << "[OpenGL Error] " 
-			      << "(" << error << ")" 
-			      << function
-				  << " " << file
-				  << ":" << line
-			      << std::endl;
-		return false;
-	}
-
-	return true;
-}
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
 
 static std::string ReadShaderFile(const std::string& shaderFile)
 {
@@ -114,82 +96,6 @@ static unsigned int CreateShader(const ShaderProgramSource& source)
 	return program;
 }
 
-/**
- * Borrowed from: https://github.com/SaschaWillems/openglcpp/blob/master/computeShader/computeShaderParticleSystem/main.cpp#L44
- */
-static void APIENTRY glDebugCallback(
-	GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	const GLvoid* userParam
-) {
-	std::string msgSource;
-	switch (source){
-	case GL_DEBUG_SOURCE_API:
-		msgSource = "WINDOW_SYSTEM";
-		break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER:
-		msgSource = "SHADER_COMPILER";
-		break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:
-		msgSource = "THIRD_PARTY";
-		break;
-	case GL_DEBUG_SOURCE_APPLICATION:
-		msgSource = "APPLICATION";
-		break;
-	case GL_DEBUG_SOURCE_OTHER:
-		msgSource = "OTHER";
-		break;
-	}
-
-	std::string msgType;
-	switch (type) {
-		case GL_DEBUG_TYPE_ERROR:
-			msgType = "ERROR";
-			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-			msgType = "DEPRECATED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-			msgType = "UNDEFINED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_PORTABILITY:
-			msgType = "PORTABILITY";
-			break;
-		case GL_DEBUG_TYPE_PERFORMANCE:
-			msgType = "PERFORMANCE";
-			break;
-		case GL_DEBUG_TYPE_OTHER:
-			msgType = "OTHER";
-			break;
-	}
-
-	std::string msgSeverity;
-	switch (severity){
-		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			msgSeverity = "Notification";
-			break;
-		case GL_DEBUG_SEVERITY_LOW:
-			msgSeverity = "LOW";
-			break;
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			msgSeverity = "MEDIUM";
-			break;
-		case GL_DEBUG_SEVERITY_HIGH:
-			msgSeverity = "HIGH";
-			break;
-	}
-
-	printf("glDebugMessage:\n%s \n type = %s source = %s severity = %s\n", message, msgType.c_str(), msgSource.c_str(), msgSeverity.c_str());
-	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) 
-	{
-		__debugbreak();
-	}
-}
-
 int main(void)
 {
 	GLFWwindow* window;
@@ -234,35 +140,29 @@ int main(void)
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // so the debugbreak has the call stack
 	glEnable(GL_DEBUG_OUTPUT);
 	
+
+
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	float positions[] = {
 		-0.5f, -0.5f,
 		 0.5f, -0.5f,
 		 0.5f,  0.5f,
 		-0.5f,  0.5f,
 	};
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	unsigned int vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), &positions, GL_STATIC_DRAW);
+	VertexBuffer vb(positions, sizeof(positions));
 
 	const unsigned int POSITION_ATTRIB_IDX = 0;
 	glVertexAttribPointer(POSITION_ATTRIB_IDX, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 	glEnableVertexAttribArray(POSITION_ATTRIB_IDX);
 
-	unsigned int ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+	unsigned int indices[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+	IndexBuffer ib(indices, 6);
 
 	ShaderProgramSource source = ReadShaderSource("Basic");
 	unsigned int shader = CreateShader(source);
@@ -291,7 +191,7 @@ int main(void)
 		glUniform4f(location, r, 0.3, 0.8, 1.0);
 
 		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		ib.Bind();
 		/* End of rebinding */
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

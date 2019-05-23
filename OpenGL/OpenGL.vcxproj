@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -140,13 +140,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Debug.cpp" />
+    <ClCompile Include="src\IndexBuffer.cpp" />
+    <ClCompile Include="src\VertexBuffer.cpp" />
     <None Include="res\shaders\Basic.vert">
       <FileType>Document</FileType>
     </None>
+    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Application.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Debug.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\VertexBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
