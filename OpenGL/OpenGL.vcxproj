@@ -143,8 +143,10 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Debug.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
+    <ClCompile Include="src\vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <None Include="res\shaders\Basic.vert">
       <FileType>Document</FileType>
     </None>
@@ -159,9 +161,15 @@
     <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\vendor\stb_image\stb_image.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\VertexBufferLayout.h" />
+    <ClInclude Include="src\Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\dice.png" />
+    <Image Include="res\textures\tenor.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

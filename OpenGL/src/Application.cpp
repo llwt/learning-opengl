@@ -9,6 +9,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -53,18 +54,31 @@ int main(void)
 	}
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // so the debugbreak has the call stack
 	glEnable(GL_DEBUG_OUTPUT);
+
+	// enable transparency blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	float positions[] = {
-		-0.5f, -0.5f, // 1
-		 0.5f, -0.5f, // 2
-		 0.5f,  0.5f, // 3
-		-0.5f,  0.5f, // 4
+		// "full screen"
+		-1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
+		 1.0f, -1.0f, 1.0f, 0.0f, // 1 -- bottom right 
+		 1.0f,  1.0f, 1.0f, 1.0f, // 2 -- top right
+		-1.0f,  1.0f, 0.0f, 1.0f  // 3 -- top left
+		
+		/* // "centered
+		-0.5f, -0.5f, 0.0f, 0.0f, // 0 -- bottom left
+		 0.5f, -0.5f, 1.0f, 0.0f, // 1 -- bottom right 
+		 0.5f,  0.5f, 1.0f, 1.0f, // 2 -- top right
+		-0.5f,  0.5f, 0.0f, 1.0f  // 3 -- top left
+		*/
 	};
 
 	VertexArray va;
 	VertexBuffer vb(positions, sizeof(positions));
 	VertexBufferLayout layout;
-	layout.Push<float>(2);
+	layout.Push<float>(2); // vertex coordinates
+	layout.Push<float>(2); // texture coordinates
 	va.AddBuffer(vb, layout);
 
 	glEnableVertexAttribArray(0);
@@ -78,6 +92,11 @@ int main(void)
 	Shader shader("Basic");
 	shader.Bind();
 	shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+	Texture texture("res/textures/tenor.png");
+	//Texture texture("res/textures/dice.png");
+	texture.Bind(0);
+	shader.SetUniform1i("u_Texture", 0);
 
 	// Unbind everything (so we can play around with rebinding before drawing and vaos)
 	va.Unbind();

@@ -1,13 +1,5 @@
 #include "Renderer.h"
 
-Renderer::Renderer()
-{
-}
-
-Renderer::~Renderer()
-{
-}
-
 void Renderer::Clear() const
 {
 	glClear(GL_COLOR_BUFFER_BIT);
