@@ -109,10 +109,12 @@ int main(void)
 		glm::vec3(-100, 0, 0) // Moving camera "right" means shifting verticies "left"
 	);
 	// Move object "up" and to the "right" 200px
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+	glm::mat4 model = glm::translate(
+		glm::mat4(1.0f),
+		glm::vec3(200, 200, 0)
+	);
 
-	// right to left (PVM) due to matrix structure in OpenGL
-	glm::mat4 mvp = proj * view * model; 
+	glm::mat4 mvp = proj * view * model;
 
 	Shader shader("Basic");
 	shader.Bind();
