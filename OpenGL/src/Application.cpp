@@ -29,7 +29,8 @@ int main(void)
 
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	//window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -62,13 +63,19 @@ int main(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	float positions[] = {
-		// "full screen"
-		-1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
-		 1.0f, -1.0f, 1.0f, 0.0f, // 1 -- bottom right 
-		 1.0f,  1.0f, 1.0f, 1.0f, // 2 -- top right
-		-1.0f,  1.0f, 0.0f, 1.0f  // 3 -- top left
+		// "bottom left square" 960/540 
+		100.0f, 100.0f, 0.0f, 0.0f, // 0 -- bottom left
+		100.0f, 200.0f, 1.0f, 0.0f, // 1 -- bottom right 
+		200.0f, 200.0f, 1.0f, 1.0f, // 2 -- top right
+		200.0f, 100.0f, 0.0f, 1.0f  // 3 -- top left
+
+		// "full screen" 1:1
+		// -1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
+		//  1.0f, -1.0f, 1.0f, 0.0f, // 1 -- bottom right 
+		//  1.0f,  1.0f, 1.0f, 1.0f, // 2 -- top right
+		// -1.0f,  1.0f, 0.0f, 1.0f  // 3 -- top left
 		
-		/* // "centered
+		/* // "centered 1:1
 		-0.5f, -0.5f, 0.0f, 0.0f, // 0 -- bottom left
 		 0.5f, -0.5f, 1.0f, 0.0f, // 1 -- bottom right 
 		 0.5f,  0.5f, 1.0f, 1.0f, // 2 -- top right
@@ -92,7 +99,8 @@ int main(void)
 	IndexBuffer ib(indices, 6);
 	
 	// 4:3 aspect ratio since window is 640x480
-	glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+	// glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+	glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 
 	Shader shader("Basic");
 	shader.Bind();
