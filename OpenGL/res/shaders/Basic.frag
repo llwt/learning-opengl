@@ -9,9 +9,6 @@ uniform sampler2D u_Texture;
 
 void main()
 {
-  // TODO: how can we modulate textColor by u_Color?
-  // color = u_Color;
-
   vec4 texColor = texture(u_Texture, v_TexCoord);
 
   // Can we just = texture here? 
