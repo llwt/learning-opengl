@@ -1,9 +1,11 @@
 #include <iostream>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "Debug.h"
-
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexArray.h"
@@ -88,10 +90,14 @@ int main(void)
 		2, 3, 0
 	};
 	IndexBuffer ib(indices, 6);
+	
+	// 4:3 aspect ratio since window is 640x480
+	glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
 
 	Shader shader("Basic");
 	shader.Bind();
 	shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+	shader.SetUniformMatrix4f("u_MVP", proj);
 
 	Texture texture("res/textures/tenor.png");
 	//Texture texture("res/textures/dice.png");
