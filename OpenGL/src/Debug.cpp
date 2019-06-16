@@ -93,9 +93,9 @@ void APIENTRY glDebugCallback(
 			break;
 	}
 
-	printf("glDebugMessage:\n%s \n type = %s source = %s severity = %s\n", message, msgType.c_str(), msgSource.c_str(), msgSeverity.c_str());
 	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) 
 	{
+		printf("glDebugMessage:\n%s \n type = %s source = %s severity = %s\n", message, msgType.c_str(), msgSource.c_str(), msgSeverity.c_str());
 		__debugbreak();
 	}
 }
