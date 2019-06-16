@@ -73,12 +73,14 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
+	float scale = 2.0f;
+	
 	float positions[] = {
 		// "bottom left square" 960/540 
-		100.0f, 100.0f, 0.0f, 0.0f, // 0 -- bottom left
-		100.0f, 200.0f, 1.0f, 0.0f, // 1 -- bottom right 
-		200.0f, 200.0f, 1.0f, 1.0f, // 2 -- top right
-		200.0f, 100.0f, 0.0f, 1.0f  // 3 -- top left
+		  0.0f,           0.0f,         0.0f, 0.0f, // 0 -- bottom left
+		  0.0f,         100.0f * scale, 1.0f, 0.0f, // 1 -- bottom right 
+		100.0f * scale, 100.0f * scale, 1.0f, 1.0f, // 2 -- top right
+		100.0f * scale,   0.0f,         0.0f, 1.0f  // 3 -- top left
 
 		// "full screen" 1:1
 		// -1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
@@ -133,9 +135,9 @@ int main(void)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-	float r = 0.00f;
 	float increment = 0.05f;
 	glm::vec3 modelTranslation = glm::vec3(200, 200, 0);
+	glm::vec4 color = glm::vec4(0.00f, 0.3f, 0.8f, 1.0f);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -162,26 +164,25 @@ int main(void)
 
 		/* Start rebinding stuff we explicity unbound */
 		shader.Bind();
-		shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+		shader.SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
 		shader.SetUniformMatrix4f("u_MVP", mvp);
-
 
 		renderer.Draw(va, ib, shader);
 
 
 		/* End of rebinding */
 
-		if (r > 1.0f)
+		if (color.r > 1.0f)
 			increment = -0.05f;
-		else if (r < 0.0f)
+		else if (color.r < 0.0f)
 			increment = 0.05f;
 
-		r += increment;
+		color.r += increment;
 
         {
             ImGui::Begin("Debug");                     
-			ImGui::SliderFloat3("Model Translation", &modelTranslation.x, 0.0f, std::max((float)windowX, (float)windowY));
-            // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+			ImGui::SliderFloat2("X & Y", &modelTranslation.x, 0.0f, std::max((float)windowX, (float)windowY));
+            ImGui::ColorEdit4("color", (float*)&color.r);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
