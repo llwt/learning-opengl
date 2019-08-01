@@ -77,10 +77,10 @@ int main(void)
 	
 	float positions[] = {
 		// "bottom left square" 960/540 
-		  0.0f,           0.0f,         0.0f, 0.0f, // 0 -- bottom left
-		  0.0f,         100.0f * scale, 1.0f, 0.0f, // 1 -- bottom right 
-		100.0f * scale, 100.0f * scale, 1.0f, 1.0f, // 2 -- top right
-		100.0f * scale,   0.0f,         0.0f, 1.0f  // 3 -- top left
+		-50.0f * scale, -50.0f * scale, 0.0f, 0.0f, // 0 -- bottom left
+		-50.0f * scale,  50.0f * scale, 1.0f, 0.0f, // 1 -- bottom right 
+		 50.0f * scale,  50.0f * scale, 1.0f, 1.0f, // 2 -- top right
+		 50.0f * scale, -50.0f * scale, 0.0f, 1.0f  // 3 -- top left
 
 		// "full screen" 1:1
 		// -1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
@@ -136,8 +136,19 @@ int main(void)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
 	float increment = 0.05f;
-	glm::vec3 modelTranslation = glm::vec3(200, 200, 0);
+	// glm::vec3 modelTranslation = glm::vec3(200, 200, 0);
+	glm::vec3 modelTranslationA = glm::vec3(0, 0, 0);
+	glm::vec3 modelTranslationB = glm::vec3(200, 200, 0);
 	glm::vec4 color = glm::vec4(0.00f, 0.3f, 0.8f, 1.0f);
+
+
+	/*
+	glm::mat4 view = glm::translate( // Move camera 100px to the "right"
+		glm::mat4(1.0f),			   // identity TODO: why is this needed?
+		glm::vec3(-100, 0, 0)          // Moving camera "right" means shifting verticies "left"
+	);
+	*/
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // Noop translation
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -150,24 +161,36 @@ int main(void)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		/* setup Model View Projection */
-		glm::mat4 proj = glm::ortho(0.0f, (float)windowX, 0.0f, (float)windowY, -1.0f, 1.0f); // map to pixel space
-		glm::mat4 view = glm::translate( // Move camera 100px to the "right"
-			glm::mat4(1.0f),			   // identity TODO: why is this needed?
-			glm::vec3(-100, 0, 0)          // Moving camera "right" means shifting verticies "left"
-		);
-		glm::mat4 model = glm::translate( // Move object "up" and to the "right" 200px
-			glm::mat4(1.0f),
-			modelTranslation
-		); 
-		glm::mat4 mvp = proj * view * model;  // right to left (PVM) due to matrix structure in OpenGL
-
 		/* Start rebinding stuff we explicity unbound */
 		shader.Bind();
 		shader.SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
-		shader.SetUniformMatrix4f("u_MVP", mvp);
 
-		renderer.Draw(va, ib, shader);
+		// map projection to pixel space
+		glm::mat4 proj = glm::ortho(0.0f, (float)windowX, 0.0f, (float)windowY, -1.0f, 1.0f);
+
+		/* Draw instance with "A" translation */
+		{
+			glm::mat4 model = glm::translate( // Move object "up" and to the "right" 200px
+				glm::mat4(1.0f),
+				modelTranslationA
+			); 
+			glm::mat4 mvp = proj * view * model;  // right to left (PVM) due to matrix structure in OpenGL
+			shader.SetUniformMatrix4f("u_MVP", mvp);
+
+			renderer.Draw(va, ib, shader);
+		}
+
+		/* Draw instance againt but with "B" translation */
+		{
+			glm::mat4 model = glm::translate( // Move object "up" and to the "right" 200px
+				glm::mat4(1.0f),
+				modelTranslationB
+			); 
+			glm::mat4 mvp = proj * view * model;  // right to left (PVM) due to matrix structure in OpenGL
+			shader.SetUniformMatrix4f("u_MVP", mvp);
+
+			renderer.Draw(va, ib, shader);
+		}
 
 
 		/* End of rebinding */
@@ -181,7 +204,8 @@ int main(void)
 
         {
             ImGui::Begin("Debug");                     
-			ImGui::SliderFloat2("X & Y", &modelTranslation.x, 0.0f, std::max((float)windowX, (float)windowY));
+			ImGui::SliderFloat2("A: X & Y", &modelTranslationA.x, 0.0f, std::max((float)windowX, (float)windowY));
+			ImGui::SliderFloat2("B: X & Y", &modelTranslationB.x, 0.0f, std::max((float)windowX, (float)windowY));
             ImGui::ColorEdit4("color", (float*)&color.r);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
