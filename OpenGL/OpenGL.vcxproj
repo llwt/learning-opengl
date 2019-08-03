@@ -91,7 +91,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenGL\Dependencies\GLFW\include;$(SolutionDir)OpenGL\Dependencies\GLEW\include;src\vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenGL\Dependencies\GLFW\include;$(SolutionDir)OpenGL\Dependencies\GLEW\include;src\vendor;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -115,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenGL\Dependencies\GLFW\include;$(SolutionDir)OpenGL\Dependencies\GLEW\include;src\vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)OpenGL\Dependencies\GLFW\include;$(SolutionDir)OpenGL\Dependencies\GLEW\include;src\vendor;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -154,6 +154,8 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\tests\TestClearColor.cpp" />
+    <ClCompile Include="src\tests\TestMultipleViewports.cpp" />
     <None Include="res\shaders\Basic.vert">
       <FileType>Document</FileType>
     </None>
@@ -300,6 +302,7 @@
     <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\tests\Test.h" />
     <ClInclude Include="src\vendor\glm\common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_common.hpp" />
     <ClInclude Include="src\vendor\glm\detail\compute_vector_relational.hpp" />
@@ -554,6 +557,8 @@
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\VertexBufferLayout.h" />
     <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\tests\TestClearColor.h" />
+    <ClInclude Include="src\tests\TestMultipleViewports.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\dice.png" />

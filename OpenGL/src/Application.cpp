@@ -19,6 +19,9 @@
 #include "Renderer.h"
 #include "Texture.h"
 
+#include "tests/TestClearColor.h"
+#include "tests/TestMultipleViewports.h"
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -72,59 +75,6 @@ int main(void)
 	// enable transparency blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	float scale = 2.0f;
-	
-	float positions[] = {
-		// "bottom left square" 960/540 
-		-50.0f * scale, -50.0f * scale, 0.0f, 0.0f, // 0 -- bottom left
-		-50.0f * scale,  50.0f * scale, 1.0f, 0.0f, // 1 -- bottom right 
-		 50.0f * scale,  50.0f * scale, 1.0f, 1.0f, // 2 -- top right
-		 50.0f * scale, -50.0f * scale, 0.0f, 1.0f  // 3 -- top left
-
-		// "full screen" 1:1
-		// -1.0f, -1.0f, 0.0f, 0.0f, // 0 -- bottom left
-		//  1.0f, -1.0f, 1.0f, 0.0f, // 1 -- bottom right 
-		//  1.0f,  1.0f, 1.0f, 1.0f, // 2 -- top right
-		// -1.0f,  1.0f, 0.0f, 1.0f  // 3 -- top left
-		
-		/* // "centered 1:1
-		-0.5f, -0.5f, 0.0f, 0.0f, // 0 -- bottom left
-		 0.5f, -0.5f, 1.0f, 0.0f, // 1 -- bottom right 
-		 0.5f,  0.5f, 1.0f, 1.0f, // 2 -- top right
-		-0.5f,  0.5f, 0.0f, 1.0f  // 3 -- top left
-		*/
-	};
-
-	VertexArray va;
-	VertexBuffer vb(positions, sizeof(positions));
-	VertexBufferLayout layout;
-	layout.Push<float>(2); // vertex coordinates
-	layout.Push<float>(2); // texture coordinates
-	va.AddBuffer(vb, layout);
-
-	glEnableVertexAttribArray(0);
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-	IndexBuffer ib(indices, 6);
-	
-	Shader shader("Basic");
-	shader.Bind();
-	shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-
-	Texture texture("res/textures/tenor.png");
-	//Texture texture("res/textures/dice.png");
-	texture.Bind(0);
-	shader.SetUniform1i("u_Texture", 0);
-
-	// Unbind everything (so we can play around with rebinding before drawing and vaos)
-	va.Unbind();
-	vb.Unbind();
-	ib.Unbind();
-	shader.Unbind();
 
 	Renderer renderer;
 
@@ -134,21 +84,19 @@ int main(void)
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+	
+	struct TestCase {
+		const char* label;
+		test::Test* test;
+	};
 
-	float increment = 0.05f;
-	// glm::vec3 modelTranslation = glm::vec3(200, 200, 0);
-	glm::vec3 modelTranslationA = glm::vec3(0, 0, 0);
-	glm::vec3 modelTranslationB = glm::vec3(200, 200, 0);
-	glm::vec4 color = glm::vec4(0.00f, 0.3f, 0.8f, 1.0f);
+	TestCase* tests[] = {
+		new TestCase{ "Multiple Viewports", new test::TestMultipleViewports() },
+		new TestCase{ "Clear Color",        new test::TestClearColor() },
+	};
 
-
-	/*
-	glm::mat4 view = glm::translate( // Move camera 100px to the "right"
-		glm::mat4(1.0f),			   // identity TODO: why is this needed?
-		glm::vec3(-100, 0, 0)          // Moving camera "right" means shifting verticies "left"
-	);
-	*/
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // Noop translation
+	static const char* selectedLabel = NULL;
+	TestCase *currentTest = NULL;
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -156,61 +104,35 @@ int main(void)
 		/* Render here */
 		renderer.Clear();
 
+		if (currentTest) {
+			currentTest->test->OnUpdate(0.0f);
+			currentTest->test->OnRender(renderer, windowX, windowY);
+		}
+
 		// Start the ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		/* Start rebinding stuff we explicity unbound */
-		shader.Bind();
-		shader.SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
-
-		// map projection to pixel space
-		glm::mat4 proj = glm::ortho(0.0f, (float)windowX, 0.0f, (float)windowY, -1.0f, 1.0f);
-
-		/* Draw instance with "A" translation */
+        ImGui::Begin("Test Selector");                     
+		if (ImGui::BeginCombo("Test name", selectedLabel)) 
 		{
-			glm::mat4 model = glm::translate( // Move object "up" and to the "right" 200px
-				glm::mat4(1.0f),
-				modelTranslationA
-			); 
-			glm::mat4 mvp = proj * view * model;  // right to left (PVM) due to matrix structure in OpenGL
-			shader.SetUniformMatrix4f("u_MVP", mvp);
-
-			renderer.Draw(va, ib, shader);
+			for (int i = 0; i < IM_ARRAYSIZE(tests); i++) 
+			{
+				bool isSelected = selectedLabel == tests[i]->label;
+				if (ImGui::Selectable(tests[i]->label, isSelected)) 
+				{
+					currentTest = tests[i];
+					selectedLabel = currentTest->label;
+				};
+			}
+			ImGui::EndCombo();
 		}
+		ImGui::End();
 
-		/* Draw instance againt but with "B" translation */
-		{
-			glm::mat4 model = glm::translate( // Move object "up" and to the "right" 200px
-				glm::mat4(1.0f),
-				modelTranslationB
-			); 
-			glm::mat4 mvp = proj * view * model;  // right to left (PVM) due to matrix structure in OpenGL
-			shader.SetUniformMatrix4f("u_MVP", mvp);
-
-			renderer.Draw(va, ib, shader);
+		if (currentTest) {
+			currentTest->test->OnImGuiRender(windowX, windowY);
 		}
-
-
-		/* End of rebinding */
-
-		if (color.r > 1.0f)
-			increment = -0.05f;
-		else if (color.r < 0.0f)
-			increment = 0.05f;
-
-		color.r += increment;
-
-        {
-            ImGui::Begin("Debug");                     
-			ImGui::SliderFloat2("A: X & Y", &modelTranslationA.x, 0.0f, std::max((float)windowX, (float)windowY));
-			ImGui::SliderFloat2("B: X & Y", &modelTranslationB.x, 0.0f, std::max((float)windowX, (float)windowY));
-            ImGui::ColorEdit4("color", (float*)&color.r);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
 
         ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
